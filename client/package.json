@@ -1,0 +1,25 @@
+{
+	"name": "codewind-java-profiler-client",
+	"description": "VSCode Client for the Codewind Java Profiler",
+	"version": "0.2.0",
+	"author": "IBM",
+	"publisher": "IBM",
+	"license": "EPL-2.0",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/eclipse/codewind-java-profiler"
+	},
+	"engines": {
+		"vscode": "^1.23.0"
+	},
+	"scripts": {
+		"update-vscode": "vscode-install",
+		"postinstall": "vscode-install"
+	},
+	"dependencies": {
+		"vscode-languageclient": "^4.1.4"
+	},
+	"devDependencies": {
+		"vscode": "^1.1.30"
+	}
+}
