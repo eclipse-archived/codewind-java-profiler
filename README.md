@@ -9,10 +9,15 @@ This extension provides code highlighting showing relative time spent in Java me
 
 ## Usage
 
+### Prerequisites
+
+- The Codewind extension (available [here](https://marketplace.visualstudio.com/items?itemName=IBM.codewind)) installed in Visual Studio Code.
+- A Java Liberty project bound to Codewind.
+
 With Visual Studio Code:
 
-- Open .
-- This will create profiling data in a `load-test/[timestamp]/xxxx.hcd` file in your Codewind project.
+- Open your Java Liberty Project's Performance Dashboard by right-clicking on the project in the Codewind section of Visual Studio Code and selecting `Open Performance Dashboard`.
+- Once the test has completed, it will create profiling data in a `load-test/[timestamp]/xxxx.hcd` file in your Codewind project.
 - In Visual Studio Code open a Java file in your project.
 - The extension will highlight any methods which were found in the profiling data and annotate them to show the percentage of time they were running on the CPU during profiling.
 
