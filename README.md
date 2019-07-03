@@ -1,17 +1,17 @@
 # Codewind Java Profiler
 
-Annotates your Java code with code highlighting for your hottest methods in your Codewind projects.
+Annotates your Java code with code highlighting for your hottest methods in your Eclipse Codewind projects.
 
 ![platforms](https://img.shields.io/badge/runtime-Java-yellow.svg)
 [![Eclipse License](https://img.shields.io/badge/license-Eclipse-brightgreen.svg)](https://github.com/eclipse/codewind-java-profiler/blob/master/LICENSE)
 
-This extension provides code highlighting showing relative time spent in Java methods based on profiling data gathered through Codewind Load Testing.
+This extension provides code highlighting showing relative time spent in Java methods based on profiling data gathered through Codewind's load testing feature.
 
 ## Usage
 
 ### Prerequisites
 
-- The Codewind extension (available [here](https://marketplace.visualstudio.com/items?itemName=IBM.codewind)) installed in Visual Studio Code.
+- The Eclipse Codewind extension (available [here](https://marketplace.visualstudio.com/items?itemName=IBM.codewind)) installed in Visual Studio Code.
 - A Java Liberty project bound to Codewind.
 
 With Visual Studio Code:
