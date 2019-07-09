@@ -18,7 +18,9 @@ import * as ip from 'ip';
 
 const docker = new Docker();
 const clientPort: number = 3333;
-const dockerImage: string = 'java-ls';
+const dockerRepo: string = 'ibmcom';
+const dockerImage: string = 'codewind-java-profiler-language-server';
+const dockerTag: string = 'latest';
 let clientServer: net.Server;
 let client: LanguageClient;
 let serverConnected = false;
@@ -60,45 +62,18 @@ export async function activate(context: ExtensionContext) {
 }
 
 async function startServerDockerContainer(dockerBinds: string[]) {
-	if(!process.env.REMOTE_SERVER) {
-		let originalContainer: Docker.Container;
-		try {
-			originalContainer = await docker.getContainer(dockerImage);
-			try {
-				await originalContainer.stop();
-			} catch (error) {
-				// don't care if already stopped
-			}
-			await originalContainer.remove();
-		} catch (error) {
-			// if it doesn't exist then try to build it
-			// TODO: host image and try to pull instead
-			const pack = tarfs.pack(path.join(__dirname, '../..', 'server'));
-
-			const stream = await docker.buildImage(pack, {t: dockerImage});
-			// wait for the build to finish
-			await new Promise((resolve, reject) => {
-				docker.modem.followProgress(stream, (err: any, res: {} | PromiseLike<{}>) => err ? reject(err) : resolve(res), (event) => {
-					// console.log(event.stream);
-				});
-			});
-		}
-
-		const container = await docker.createContainer({
-			Image: dockerImage,
-			name: dockerImage,
-			Env: [`CLIENT_PORT=${clientPort}`, `CLIENT_HOST=${ip.address()}`, `BINDS="${dockerBinds}"`],
-			HostConfig: {
-				Binds: dockerBinds
-			}
-		});
-
-		container.start();
+	try {
+		await pullDockerImage();
+		console.log('Pull completed!');
+	} catch (error) {
+		console.log('Pull failed, building from local Dockerfile');
+		await buildLocalDockerImage();
 	}
+	await startContainer(dockerBinds);
 
 	setupConnectionListeners();
-
 	const serverSocket = await waitForServerConnection();
+
 	// Connect to language server via socket
 	let result: StreamInfo = {
 			writer: serverSocket,
@@ -128,6 +103,52 @@ function waitForServerConnection() {
 	});
 }
 
+async function pullDockerImage() {
+	await removeExistingContainer();
+	await docker.pull(`${dockerRepo}/${dockerImage}:${dockerTag}`, {});
+}
+
+async function buildLocalDockerImage() {
+	try {
+		await removeExistingContainer();
+	} catch (error) {
+		// if it doesn't exist then try to build it
+		// TODO: host image and try to pull instead
+		const pack = tarfs.pack(path.join(__dirname, '../..', 'server'));
+
+		const stream = await docker.buildImage(pack, {t: dockerImage});
+		// wait for the build to finish
+		await new Promise((resolve, reject) => {
+			docker.modem.followProgress(stream, (err: any, res: {} | PromiseLike<{}>) => err ? reject(err) : resolve(res), (event) => {
+				// console.log(event.stream);
+			});
+		});
+	}
+}
+
+async function removeExistingContainer() {
+	let originalContainer: Docker.Container;
+	originalContainer = await docker.getContainer(dockerImage);
+	try {
+		await originalContainer.stop();
+	} catch (error) {
+		// don't care if already stopped
+	}
+	await originalContainer.remove();
+}
+
+async function startContainer(dockerBinds: string[]) {
+	const container = await docker.createContainer({
+		Image: dockerImage,
+		name: dockerImage,
+		Env: [`CLIENT_PORT=${clientPort}`, `CLIENT_HOST=${ip.address()}`, `BINDS="${dockerBinds}"`],
+		HostConfig: {
+			Binds: dockerBinds
+		}
+	});
+
+	container.start();
+}
 function setupConnectionListeners() {
 	// wait for the language server to connect
 	clientServer.setMaxListeners(1);
