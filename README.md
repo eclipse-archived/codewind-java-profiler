@@ -1,16 +1,28 @@
-# Codewind Language Server for Java Profiling
+# Codewind Java Profiler
+
+Annotates your Java code with code highlighting for your hottest methods in your Eclipse Codewind projects.
 
 ![platforms](https://img.shields.io/badge/runtime-Java-yellow.svg)
 [![Eclipse License](https://img.shields.io/badge/license-Eclipse-brightgreen.svg)](https://github.com/eclipse/codewind-java-profiler/blob/master/LICENSE)
 [![License](https://img.shields.io/badge/License-EPL%202.0-red.svg?label=license&logo=eclipse)](https://www.eclipse.org/legal/epl-2.0/)
 [EPL 2.0](https://github.com/eclipse/codewind-java-profiler/blob/master/LICENSE)
 
-The Codewind language server for Java profiling annotates your Java code with code highlighting. By using profiling data gathered through Codewind load testing, the highlighting shows the relative time that is spent in JavaScript functions.
+This extension provides code highlighting showing relative time spent in Java methods based on profiling data gathered through Codewind's load testing feature.
 
-## Running the extension with Visual Studio Code (VS Code)
-1. Open a local project that you created with [Codewind](https://microclimate-dev2ops.github.io/installlocally) and profiled by using the [performance test](https://microclimate-dev2ops.github.io/performancetesting#performance-testing-your-project) feature.
-2. Opening the project creates profiling data in a `load-test/[timestamp]/<file_name>.hcd` file in your Codewind project.
-3. In VS Code, open a Java file in your project. The extension highlights any lines that it finds in the profiling data and annotates them to show the percentage of time they were running on the CPU during profiling.
+## Usage
+
+### Prerequisites
+
+- The Eclipse Codewind extension (available [here](https://marketplace.visualstudio.com/items?itemName=IBM.codewind)) installed in Visual Studio Code.
+- A Java Liberty project bound to Codewind.
+
+With Visual Studio Code:
+
+- Open your Java Liberty Project's Performance Dashboard by right-clicking on the project in the Codewind section of Visual Studio Code and selecting `Open Performance Dashboard`.
+- Once the Performance Dashboard opens, click `Run Load Test`.
+- Once the test has completed, it will create profiling data in a `load-test/[timestamp]/xxxx.hcd` file in your Codewind project.
+- In Visual Studio Code open a Java file in your project.
+- The extension will highlight any methods which were found in the profiling data and annotate them to show the percentage of time they were running on the CPU during profiling.
 
 ## Contributing
 Submit issues and contributions:

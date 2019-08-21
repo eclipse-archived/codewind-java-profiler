@@ -1,7 +1,7 @@
 {
 	"name": "codewind-java-profiler",
 	"displayName": "Codewind Java Profiler",
-	"description": "Code Highlighting for Codewind's Java Load Testing",
+	"description": "Code Highlighting for Eclipse Codewind's Java Load Testing",
 	"version": "19.6.0",
 	"author": "IBM",
 	"publisher": "IBM",
@@ -16,7 +16,7 @@
 		"Profiling",
 		"Java",
 		"Load",
-		"IBM"
+		"Eclipse"
 	],
 	"icon": "res/img/codewind-logo.png",
 	"homepage": "https://www.eclipse.org/codewind/",
