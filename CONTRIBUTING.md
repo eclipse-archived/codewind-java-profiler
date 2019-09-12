@@ -1,46 +1,30 @@
-# Contributing
+## Contributing
+Thank you for your interest in contributing to Codewind. We welcome your additions to this project.
 
-## Running the Extension
+#### Signing the Eclipse Contributor Agreement (ECA)
+Before you can contribute to any Eclipse project, you need to sign the [Eclipse Contributor Agreement (ECA)](https://www.eclipse.org/legal/ECA.php).
+1. To verify that you signed the ECA, sign in to [https://accounts.eclipse.org/ your Eclipse account].
+2. View your **Status** and make sure that a check mark appears with the **Eclipse Contributor Agreement**.
+3. If the check mark does not appear, click the **Eclipse Contributor Agreement** in the **Status** box to go to the agreement that you need to sign.
+4. Fill the form and click the **Accept** button.
 
-With Visual Studio Code:
+#### Associating your Eclipse profile with your GitHub ID
+1. From your Eclipse account, select **Edit Profile**.
+2. On the **Personal Information** tab, go to the **Social Media Links** section and add your GitHub user name to the **GitHub Username** field.
+3. Answer the **Have you changed employers** question.
+4. Enter your Eclipse password in the **Current password** field and then click **Save**.
 
-- Clone this repository locally.
-- Run `npm install` in the cloned `codewind-java-profiler` folder. This installs all necessary npm modules in the client directory.
-- Open the clone of this repository in Visual Studio Code.
-- Press Ctrl+Shift+B (Cmd+Shift+B on Mac) to compile the client.
-- Switch to the Debug viewlet.
-- Select `Launch Client` from the drop down and press the Run icon.
+For more information about Codewind workflows, see the [Codewind GitHub Workflows wiki](https://wiki.eclipse.org/Codewind_GitHub_Workflows).
 
-## Testing
+#### Checking if your issue is already addressed
+- Search the [list of issues](https://github.com/eclipse/codewind/issues) to see if your issue has already been raised.
+- See the [Codewind documentation](https://www.eclipse.org/codewind/docindex.html) to see if existing documentation addresses your question or concern.
 
-### Integration Tests
+#### Creating a new issue
+If you do not see your issue, please [select the issue type in the Codewind repository to open a new issue](https://github.com/eclipse/codewind/issues/new/choose).
+- **Bugs:** Complete the bug template to report problems found in Codewind.
+- **Enhancements:** Complete the enhancement template to suggest improvements to Codewind.
+- **Questions:** Complete the question template to ask a question about Codewind.
 
-To be added
-
-### Server Tests
-
-Unit tests for the Java Server are in the `server/src/test` directory. These are JUnit unit tests, but can only be run inside the server Docker container.
-
-To run the container complete the following steps:
-
-- Run `docker build -t java-ls .` in the `server` directory.
-- Run `docker run -it java-ls bash`.
-- In the `/profiling` directory, run `mvn test`.
-- You will see a summary of all tests run.
-
-## Building/Installing the Extension
-
-To build a `.vsix` extension package that can then be installed/published:
-
-- Run `npm install` in the `codewind-java-profiler` folder.
-- Install the `vsce` package globally with `npm install -g vsce`.
-- Run `vsce package` in the `codewind-java-profiler` folder.
-- A `.vsix` file will then be generated.
-
-To install the extension:
-
-- Run `code --install-extension <name of generated vsix file>` in the `codewind-java-profiler` folder.
-- Restart Visual Studio Code.
-- The extension should appear in your list of installed extensions.
-
-For more information refer to: <https://code.visualstudio.com/api/working-with-extensions/publishing-extension>
+## Contact us
+If you have questions, please visit us on [Mattermost](https://mattermost.eclipse.org/eclipse/channels/eclipse-codewind).
