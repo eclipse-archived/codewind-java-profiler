@@ -11,16 +11,21 @@ import {
 	LanguageClientOptions,
 	StreamInfo,
 } from 'vscode-languageclient';
+import { promisify } from 'util';
 
 import * as tarfs from 'tar-fs';
 import * as Docker from 'dockerode';
 import * as ip from 'ip';
 
 const docker = new Docker();
+
+const followProgress = promisify(docker.modem.followProgress);
+
 const clientPort: number = 3333;
 const dockerRepo: string = 'ibmcom';
 const dockerImage: string = 'codewind-java-profiler-language-server';
 const dockerTag: string = 'latest';
+const dockerFullImageName = `${dockerRepo}/${dockerImage}:${dockerTag}`;
 let clientServer: net.Server;
 let client: LanguageClient;
 let serverConnected = false;
@@ -63,11 +68,20 @@ export async function activate(context: ExtensionContext) {
 
 async function startServerDockerContainer(dockerBinds: string[]) {
 	try {
+		await removeExistingContainer();
+	} catch (err) {
+		// don't care if already removed
+	}
+
+	try {
+		console.log(`Trying to pull image ${dockerFullImageName}`);
+
 		await pullDockerImage();
 		console.log('Pull completed!');
 	} catch (error) {
 		console.log('Pull failed, building from local Dockerfile');
 		await buildLocalDockerImage();
+		console.log(error);
 	}
 	await startContainer(dockerBinds);
 
@@ -104,26 +118,21 @@ function waitForServerConnection() {
 }
 
 async function pullDockerImage() {
-	await removeExistingContainer();
-	await docker.pull(`${dockerRepo}/${dockerImage}:${dockerTag}`, {});
+	const stream = await docker.pull(dockerFullImageName, {});
+	// wait for the pull to complete
+	await followProgress(stream);
 }
 
 async function buildLocalDockerImage() {
-	try {
-		await removeExistingContainer();
-	} catch (error) {
-		// if it doesn't exist then try to build it
-		// TODO: host image and try to pull instead
-		const pack = tarfs.pack(path.join(__dirname, '../..', 'server'));
+	const pack = tarfs.pack(path.join(__dirname, '../..', 'server'));
 
-		const stream = await docker.buildImage(pack, {t: dockerImage});
-		// wait for the build to finish
-		await new Promise((resolve, reject) => {
-			docker.modem.followProgress(stream, (err: any, res: {} | PromiseLike<{}>) => err ? reject(err) : resolve(res), (event) => {
-				// console.log(event.stream);
-			});
+	const stream = await docker.buildImage(pack, {t: dockerFullImageName});
+	// wait for the build to finish
+	await new Promise((resolve, reject) => {
+		docker.modem.followProgress(stream, (err: any, res: {} | PromiseLike<{}>) => err ? reject(err) : resolve(res), (event) => {
+			console.log(event.stream);
 		});
-	}
+	});
 }
 
 async function removeExistingContainer() {
@@ -139,7 +148,7 @@ async function removeExistingContainer() {
 
 async function startContainer(dockerBinds: string[]) {
 	const container = await docker.createContainer({
-		Image: dockerImage,
+		Image: dockerFullImageName,
 		name: dockerImage,
 		Env: [`CLIENT_PORT=${clientPort}`, `CLIENT_HOST=${ip.address()}`, `BINDS="${dockerBinds}"`],
 		HostConfig: {

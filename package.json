@@ -2,7 +2,7 @@
 	"name": "codewind-java-profiler",
 	"displayName": "Codewind Java Profiler",
 	"description": "Code Highlighting for Eclipse Codewind's Java Load Testing",
-	"version": "19.6.0",
+	"version": "19.7.0",
 	"author": "IBM",
 	"publisher": "IBM",
 	"license": "EPL-2.0",
