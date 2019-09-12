@@ -22,13 +22,47 @@ With Visual Studio Code:
 - In Visual Studio Code open a Java file in your project.
 - The extension will highlight any methods which were found in the profiling data and annotate them to show the percentage of time they were running on the CPU during profiling.
 
-## Contributing
+## Running the Extension
 
-We welcome submitting issues and contributions.
+With Visual Studio Code:
 
-1. [Submitting bugs](https://github.com/eclipse/codewind-java-profiler/issues)
-2. [Contributing](CONTRIBUTING.md)
+- Clone this repository locally.
+- Run `npm install` in the cloned `codewind-java-profiler` folder. This installs all necessary npm modules in the client directory.
+- Open the clone of this repository in Visual Studio Code.
+- Press Ctrl+Shift+B (Cmd+Shift+B on Mac) to compile the client.
+- Switch to the Debug viewlet.
+- Select `Launch Client` from the drop down and press the Run icon.
 
-## License
+## Testing
 
-[EPL 2.0](https://github.com/eclipse/codewind-java-profiler/blob/master/LICENSE)
+### Integration Tests
+
+To be added
+
+### Server Tests
+
+Unit tests for the Java Server are in the `server/src/test` directory. These are JUnit unit tests, but can only be run inside the server Docker container.
+
+To run the container complete the following steps:
+
+- Run `docker build -t java-ls .` in the `server` directory.
+- Run `docker run -it java-ls bash`.
+- In the `/profiling` directory, run `mvn test`.
+- You will see a summary of all tests run.
+
+## Building/Installing the Extension
+
+To build a `.vsix` extension package that can then be installed/published:
+
+- Run `npm install` in the `codewind-java-profiler` folder.
+- Install the `vsce` package globally with `npm install -g vsce`.
+- Run `vsce package` in the `codewind-java-profiler` folder.
+- A `.vsix` file will then be generated.
+
+To install the extension:
+
+- Run `code --install-extension <name of generated vsix file>` in the `codewind-java-profiler` folder.
+- Restart Visual Studio Code.
+- The extension should appear in your list of installed extensions.
+
+For more information refer to: <https://code.visualstudio.com/api/working-with-extensions/publishing-extension>
