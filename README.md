@@ -3,7 +3,7 @@
 Annotates your Java code with code highlighting for your hottest methods in your Eclipse Codewind projects.
 
 ![platforms](https://img.shields.io/badge/runtime-Java-yellow.svg)
-[![Eclipse License](https://img.shields.io/badge/license-Eclipse-brightgreen.svg)](https://github.com/eclipse/codewind-java-profiler/blob/master/LICENSE)
+[![License](https://img.shields.io/badge/License-EPL%202.0-red.svg?label=license&logo=eclipse)](https://www.eclipse.org/legal/epl-2.0/)
 
 This extension provides code highlighting showing relative time spent in Java methods based on profiling data gathered through Codewind's load testing feature.
 
