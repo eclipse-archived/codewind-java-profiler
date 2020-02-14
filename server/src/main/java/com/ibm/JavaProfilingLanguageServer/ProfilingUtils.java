@@ -38,6 +38,7 @@ public class ProfilingUtils {
 	}
 
 	public static String dockerizeFilePathUsingMountedVolume(String path, String mount) {
+		System.out.println("dFPuMV >> path=" + path + ", mount = " + mount);
 		// try to re-add special characters to the path string
 		String unescapedPath;
 		try {
@@ -45,12 +46,15 @@ public class ProfilingUtils {
 		} catch (UnsupportedEncodingException e) {
 			unescapedPath = path;
 		}
-
+		System.out.println("dFPuMV >> unescapedPath= " + unescapedPath);
 		// the workspace passed in should be in format /host/path:/docker/path
-		String[] mounts = mount.replace("\"", "").split(":");
-		String hostWorkspace = mounts[0];
-		String dockerWorkspace = mounts[1];
+		String mounts = mount.replace("\"", "");
+		int lastColonIndex = mounts.lastIndexOf(":");
+		String hostWorkspace = mounts.substring(0, lastColonIndex);
+		String dockerWorkspace = mounts.substring(lastColonIndex+1);
 		String newString = unescapedPath.replace(hostWorkspace, dockerWorkspace);
+		System.out.println("dFPuMV >> hostWorkspace= " + hostWorkspace);
+		System.out.println("dFPuMV >> dockerWorkspace= " + dockerWorkspace);
 
 		System.out.println("dockerizeFilePathUsingMountedVolume: " + newString + "\n");
 
@@ -61,7 +65,7 @@ public class ProfilingUtils {
 		// update folder paths for Docker container
 		if(workspaceFolders != null) {
 			for (WorkspaceFolder folder : workspaceFolders) {
-				folder.setUri(ProfilingUtils.dockerizeFilePath(folder.getUri()));
+				folder.setUri(ProfilingUtils.dockerizeFilePath(folder.getUri().replace("%3A", "")));
 			}
 		}
 

@@ -52,7 +52,7 @@ public class ProfilingTextDocumentService implements TextDocumentService {
 
 		for (WorkspaceFolder folder : workspaceFolders) {
 			File currentFile = new File(folder.getUri());
-			System.out.println("Workspace Folder: " + folder.getUri() + "\n");
+			System.out.println("Workspace Folder: " + currentFile.getPath() + "\n");
 			mcProjectFolders.addAll(searchForFolders(currentFile, ProfilingUtils.LOAD_TEST_DIRECTORY));
 		}
 
@@ -67,13 +67,18 @@ public class ProfilingTextDocumentService implements TextDocumentService {
 	}
 
 	private List<String> searchForFolders(File currentDir, String targetDirName) {
+		System.out.println("searchForFolders >> currentDir=" + currentDir.getPath() + ", targetDirName=" + targetDirName);
 		List<String> projectPaths = new ArrayList<String>();
 
 		File currentPath = new File(currentDir.getPath());
+		System.out.println("searchForFolders >> currentPath=" + currentPath.getPath());
 		if(currentPath.isDirectory()) {
+			System.out.println("currentPath is directory");
 			if(currentPath.getName().equals(targetDirName)) {
+				System.out.println("currentPath equals targetPath");
 				projectPaths.add(currentPath.getPath());
 			} else if(!currentPath.getName().startsWith(".") && !currentPath.getPath().contains("node_modules")) {
+				System.out.println("Finding child files");
 				File[] childFiles = currentPath.listFiles();
 				for (File file : childFiles) {
 					projectPaths.addAll(searchForFolders(file, targetDirName));
@@ -86,7 +91,7 @@ public class ProfilingTextDocumentService implements TextDocumentService {
 
 	public void didOpen(DidOpenTextDocumentParams params) {
 		TextDocumentItem document = params.getTextDocument();
-		System.out.printf("didOpen: %s%n%n", document.getUri());
+		System.out.printf("didOpen: %s%n%n", document.getUri().replace("%3A", ""));
 
 		publishProfilingDiagnostics(document);
 	}
@@ -95,10 +100,11 @@ public class ProfilingTextDocumentService implements TextDocumentService {
 
 		// create diagnostics object and link it to current file
 		PublishDiagnosticsParams diagnosticParams = new PublishDiagnosticsParams();
+		System.out.println("TextDocURI = " + textDocument.getUri());
 		diagnosticParams.setUri(textDocument.getUri());
 
 		// convert URI to docker version
-		textDocument.setUri(ProfilingUtils.dockerizeFilePath(textDocument.getUri()));
+		textDocument.setUri(ProfilingUtils.dockerizeFilePath(textDocument.getUri().replace("%3A", "")));
 
 		String projectPath = getProjectForPath(textDocument.getUri());
 		System.out.println("Project Path for file: " + projectPath + "\n");
@@ -115,6 +121,7 @@ public class ProfilingTextDocumentService implements TextDocumentService {
 
 		List<Diagnostic> diagnostics = getDiagnosticsForFile(textDocument, loadTestResults);
 		diagnosticParams.setDiagnostics(diagnostics);
+		System.out.println("diagnosticParams = " + diagnosticParams);
 
 		System.out.println("Sending diagnostics");
 		// send diagnostics to the client
@@ -154,7 +161,7 @@ public class ProfilingTextDocumentService implements TextDocumentService {
 		List<Diagnostic> diagnostics = new ArrayList<Diagnostic>();
 
 		String documentPackage = getDocumentPackage(textDocument);
-//		System.out.println("documentPackage: " + documentPackage);
+		System.out.println("documentPackage: " + documentPackage);
 
 		File hcd = getHCDFromLoadTestDir(loadTestResults);
 
@@ -170,6 +177,7 @@ public class ProfilingTextDocumentService implements TextDocumentService {
 			Range diagnosticRange = hotMethod.findInTextDocument(textDocument);
 
 			String message = String.format("Method %s() was the running function during load testing %.1f%% of the time.", hotMethod.getMethodName(), hotMethod.getPercentage());
+			System.out.println("message = " + message);
 
 			Diagnostic d = new Diagnostic();
 			d.setSource("Codewind Java Profiler");
