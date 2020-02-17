@@ -39,7 +39,7 @@ export async function activate(context: ExtensionContext) {
 	clientServer.listen(clientPort);
 
 	// start docker container
-	const dockerBinds = workspace.workspaceFolders.map(wsFolder => `${wsFolder.uri.toString().replace('file://', '')}:/profiling/${wsFolder.name}`);
+	const dockerBinds = workspace.workspaceFolders.map(wsFolder => `${wsFolder.uri.toString(true).replace('file://', '')}:/profiling/${wsFolder.name}`);
 	dockerBinds.forEach(a => console.log(a));
 
 	let serverOptions = () => startServerDockerContainer(dockerBinds);
