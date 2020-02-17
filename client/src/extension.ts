@@ -42,9 +42,9 @@ let serverConnected = false;
 let connectionSocket;
 
 function workspaceFolderToDockerBind(wsFolder: WorkspaceFolder): string {
-    let folderUriString = wsFolder.uri.toString(true);
+    let folderUriString = wsFolder.uri.toString(true).replace('file://', '');
     if (onWin) {
-        folderUriString = folderUriString.replace('file://', '').replace(':', '');
+        folderUriString = folderUriString.replace(':', '');
     }
     return `${folderUriString}:/profiling/${wsFolder.name}`;
 }
