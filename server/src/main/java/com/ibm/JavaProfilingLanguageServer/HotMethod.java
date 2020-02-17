@@ -12,7 +12,6 @@ package com.ibm.JavaProfilingLanguageServer;
 
 import java.io.Console;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -67,9 +66,8 @@ public class HotMethod {
 
 	public Range findInTextDocument(TextDocumentItem textDocument) {
 		String[] nameInFile = withinFileName.split("\\.");
-		System.out.println("nameInFile = " + Arrays.toString(nameInFile));
 		String textWithoutComments = removeCommentsFromText(textDocument.getText());
-		
+
 		Range contextRange = new Range();
 		contextRange.setStart(new Position(0,0));
 		contextRange.setEnd(new Position(999999, 999999));
@@ -78,29 +76,25 @@ public class HotMethod {
 			for (int i = 0; i < nameInFile.length; i++) {
 				String context = nameInFile[i];
 				contextRange = getRangeInTextWithinScope(context, textWithoutComments, contextRange, i);
-				System.out.println("contextRange = " + contextRange);
 			}
 
 			String[] lines = textDocument.getText().split("\\r?\\n");
-			System.out.println("lines = " + Arrays.toString(lines));
 			int startOfMethodName = contextRange.getStart().getCharacter();
 
 			String findHotMethodString = methodName + "\\(.*\\)";
-			System.out.println("findHotMethodString = " + findHotMethodString);
 			Pattern findPackage = Pattern.compile(findHotMethodString);
 			Matcher m = findPackage.matcher(lines[contextRange.getStart().getLine()]);
 			int endOfMethodName = m.find() ? m.group(0).length() : methodName.length();
 
 			contextRange.setEnd(new Position(contextRange.getStart().getLine(), startOfMethodName + endOfMethodName));
 
-					System.out.println("*** FINAL SCOPE ***");
-					System.out.printf("Range: start: %s:%s, end: %s:%s%n",
-							contextRange.getStart().getLine(), contextRange.getStart().getCharacter(),
-							contextRange.getEnd().getLine(), contextRange.getEnd().getCharacter());
+			// System.out.println("*** FINAL SCOPE ***");
+			// System.out.printf("Range: start: %s:%s, end: %s:%s%n",
+			// 	contextRange.getStart().getLine(), contextRange.getStart().getCharacter(),
+			// 	contextRange.getEnd().getLine(), contextRange.getEnd().getCharacter());
 
 		} catch (Exception e) {
 			System.out.println("Context not found within file");
-			e.printStackTrace();
 		}
 		return contextRange;
 	}
@@ -163,35 +157,29 @@ public class HotMethod {
 	}
 
 	private Range getRangeInTextWithinScope(String scope, String text, Range range, int scopeDepth) {
-		System.out.printf("scope: %s, text: %s, range: %s, scopeDepth: %s\n", scope, text, range, scopeDepth);
+		// System.out.printf("scope: %s, text: %s, range: %s, scopeDepth: %s\n", scope, text, range, scopeDepth);
 		Range scopedRange = new Range();
-		System.out.println("Looking for scope: " + scope);
 		String[] lines = text.split("\\r?\\n");
 		List<String> scopedLines = new ArrayList<String>();
 
 		boolean scopeFound = false;
 		boolean firstBracketFound = false;
 		int stepInto = 0;
-		System.out.println("i starts as " + range.getStart().getLine());
-		System.out.println("i finishes as <= " + range.getEnd().getLine() + " or " + (lines.length - 1));
 
 		for (int i = range.getStart().getLine(); i <= Math.min(range.getEnd().getLine(), lines.length - 1); i++) {
 			String line = lines[i];
 
 			if(!scopeFound && stepInto == scopeDepth) {
 				if(line.contains(scope)) {
-					System.out.println("found " + scope + " in " + line);
 					Position start = new Position();
 					scopeFound = true;
 					start.setLine(i);
 					start.setCharacter(line.indexOf(scope));
-					System.out.println("start = " + start);
 					scopedRange.setStart(start);
 				}
 			}
 
 			if(line.contains("{")) {
-				System.out.println(line + " contains {");
 				if(scopeFound && stepInto == scopeDepth) {
 					System.out.println("first bracket found");
 					firstBracketFound = true;
@@ -206,17 +194,15 @@ public class HotMethod {
 			if(firstBracketFound) {
 				scopedLines.add(line);
 				if(stepInto == scopeDepth) {
-					System.out.println("Setting end");
 					Position end = new Position();
 					end.setLine(i);
 					end.setCharacter(line.length());
-					System.out.println("end = " + end);
 					scopedRange.setEnd(end);
 					break;
 				}
 			}
 
-			System.out.printf("[%s][%s]: %s%n", stepInto, scopeDepth, line);
+			// System.out.printf("[%s][%s]: %s%n", stepInto, scopeDepth, line);
 		}
 		return scopedRange;
 	}

@@ -10,12 +10,14 @@
  *******************************************************************************/
 import * as path from 'path';
 import * as net from 'net';
-import { workspace, ExtensionContext } from 'vscode';
+import { workspace,
+		 ExtensionContext,
+		 WorkspaceFolder
+} from 'vscode';
 import {
 	LanguageClient,
 	LanguageClientOptions,
 	StreamInfo,
-	DidChangeWorkspaceFoldersNotification,
 } from 'vscode-languageclient';
 import { promisify } from 'util';
 
@@ -27,18 +29,23 @@ const docker = new Docker();
 const followProgress = promisify(docker.modem.followProgress);
 
 const clientPort: number = 3333;
-const clientHost: string = "127.0.0.1"
+const clientHost: string = "host.docker.internal"
 const dockerRepo: string = 'ibmcom';
 const dockerImage: string = 'codewind-java-profiler-language-server';
 const dockerTag: string = 'latest';
 const dockerFullImageName = `${dockerRepo}/${dockerImage}:${dockerTag}`;
+const onWin: boolean = (process.platform === 'win32' ? true : false);
 let clientServer: net.Server;
 let client: LanguageClient;
 let serverConnected = false;
 let connectionSocket;
-let onWin = false;
-if (process.platform === 'win32') {
-	onWin = true;
+
+function workspaceFolderToDockerBind(wsFolder: WorkspaceFolder): string {
+	let folderUriString = wsFolder.uri.toString(true);
+	if (onWin) {
+		folderUriString = folderUriString.replace('%3A', '').replace('file://', '');
+	}
+	return `${folderUriString}:/profiling/${wsFolder.name}`;
 }
 
 export async function activate(context: ExtensionContext) {
@@ -49,11 +56,7 @@ export async function activate(context: ExtensionContext) {
 	clientServer.listen(clientPort);
 
 	// start docker container
-
-	console.log('workspaceFolders = ');
-	workspace.workspaceFolders.forEach(a => console.log(a));
-	console.log('ended');
-	const dockerBinds = workspace.workspaceFolders.map(wsFolder => `${wsFolder.uri.toString(true).replace('%3A', '').replace('file://', '')}:/profiling/${wsFolder.name}`);
+	const dockerBinds = workspace.workspaceFolders.map(workspaceFolderToDockerBind);
 	dockerBinds.forEach(a => console.log(a));
 
 	let serverOptions = () => startServerDockerContainer(dockerBinds);
@@ -162,11 +165,10 @@ async function removeExistingContainer() {
 }
 
 async function startContainer(dockerBinds: string[]) {
-	console.log(`CLIENT_PORT=${clientPort}, CLIENT_HOST=${clientHost}, BINDS="${dockerBinds}"`);
 	const container = await docker.createContainer({
 		Image: dockerFullImageName,
 		name: dockerImage,
-		Env: [`CLIENT_PORT=${clientPort}`, `CLIENT_HOST=9.140.96.13`, `BINDS="${dockerBinds}"`],
+		Env: [`CLIENT_PORT=${clientPort}`, `CLIENT_HOST=${clientHost}`, `BINDS="${dockerBinds}"`, `WINDOWS_HOST=${onWin}`],
 		HostConfig: {
 			Binds: dockerBinds
 		}

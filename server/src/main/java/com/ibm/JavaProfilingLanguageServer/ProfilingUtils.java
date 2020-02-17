@@ -19,6 +19,7 @@ public class ProfilingUtils {
 
 	public final static String LOAD_TEST_DIRECTORY = "load-test";
 	public static String[] mountedVolumes = {};
+	private final static boolean ON_WIN = Boolean.parseBoolean(System.getenv("WINDOWS_HOST"));
 
 	/**
 	 * Converts the external path to a path recognised within the docker container
@@ -65,11 +66,19 @@ public class ProfilingUtils {
 		// update folder paths for Docker container
 		if(workspaceFolders != null) {
 			for (WorkspaceFolder folder : workspaceFolders) {
-				folder.setUri(ProfilingUtils.dockerizeFilePath(folder.getUri().replace("%3A", "")));
+				folder.setUri(ProfilingUtils.dockerizeFilePath(convertColon(folder.getUri())));
 			}
 		}
 
 		return workspaceFolders;
+	}
+
+	public static String convertColon(String uriString) {
+		if (ON_WIN) {
+			return uriString.replace("%3A", "");
+		} else {
+			return uriString;
+		}
 	}
 
 	/**
