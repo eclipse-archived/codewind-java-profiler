@@ -28,7 +28,7 @@
 		"url": "https://github.com/eclipse/codewind-java-profiler/issues"
 	},
 	"engines": {
-		"vscode": "^1.23.0"
+		"vscode": "^1.26.0"
 	},
 	"activationEvents": [
 		"onLanguage:java"
