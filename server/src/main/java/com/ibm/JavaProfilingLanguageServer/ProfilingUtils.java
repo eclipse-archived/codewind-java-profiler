@@ -39,7 +39,6 @@ public class ProfilingUtils {
 	}
 
 	public static String dockerizeFilePathUsingMountedVolume(String path, String mount) {
-		System.out.println("dFPuMV >> path=" + path + ", mount = " + mount);
 		// try to re-add special characters to the path string
 		String unescapedPath;
 		try {
@@ -47,15 +46,12 @@ public class ProfilingUtils {
 		} catch (UnsupportedEncodingException e) {
 			unescapedPath = path;
 		}
-		System.out.println("dFPuMV >> unescapedPath= " + unescapedPath);
 		// the workspace passed in should be in format /host/path:/docker/path
 		String mounts = mount.replace("\"", "");
 		int lastColonIndex = mounts.lastIndexOf(":");
 		String hostWorkspace = mounts.substring(0, lastColonIndex);
 		String dockerWorkspace = mounts.substring(lastColonIndex+1);
 		String newString = unescapedPath.replace(hostWorkspace, dockerWorkspace);
-		System.out.println("dFPuMV >> hostWorkspace= " + hostWorkspace);
-		System.out.println("dFPuMV >> dockerWorkspace= " + dockerWorkspace);
 
 		System.out.println("dockerizeFilePathUsingMountedVolume: " + newString + "\n");
 
@@ -73,13 +69,13 @@ public class ProfilingUtils {
 		return workspaceFolders;
 	}
 
-	public static String convertColon(String uriString) {
-		if (ON_WIN) {
-			return uriString.replace("%3A", "");
-		} else {
-			return uriString;
-		}
-	}
+    public static String convertColon(String uriString) {
+        if (ON_WIN) {
+            return uriString.replace("%3A", "");
+        } else {
+            return uriString;
+        }
+    }
 
 	/**
 	 * Removes the additional bits added to the start of the file paths, e.g. `file://` to give a file path which can be used

@@ -154,6 +154,7 @@ public class ProfilingTextDocumentService implements TextDocumentService {
 		List<Diagnostic> diagnostics = new ArrayList<Diagnostic>();
 
 		String documentPackage = getDocumentPackage(textDocument);
+		// System.out.println("documentPackage: " + documentPackage);
 
 		File hcd = getHCDFromLoadTestDir(loadTestResults);
 

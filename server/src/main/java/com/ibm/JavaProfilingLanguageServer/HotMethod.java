@@ -10,7 +10,6 @@
  *******************************************************************************/
 package com.ibm.JavaProfilingLanguageServer;
 
-import java.io.Console;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -144,17 +143,17 @@ public class HotMethod {
 		return finalString;
 	}
 
-	private int countMatches(String inputString, String stringToMatch) {
-		int count = 0;
-		int fromIndex = 0;
-		int foundIndex = inputString.indexOf(stringToMatch, fromIndex);
-		while (foundIndex != -1) {
-			count++;
-			fromIndex = foundIndex + 1;
-			foundIndex = inputString.indexOf(stringToMatch, fromIndex);
-		}
-		return count;
-	}
+    private int countMatches(String inputString, String stringToMatch) {
+        int count = 0;
+        int fromIndex = 0;
+        int foundIndex = inputString.indexOf(stringToMatch, fromIndex);
+        while (foundIndex != -1) {
+            count++;
+            fromIndex = foundIndex + 1;
+            foundIndex = inputString.indexOf(stringToMatch, fromIndex);
+        }
+        return count;
+    }
 
 	private Range getRangeInTextWithinScope(String scope, String text, Range range, int scopeDepth) {
 		// System.out.printf("scope: %s, text: %s, range: %s, scopeDepth: %s\n", scope, text, range, scopeDepth);
@@ -181,7 +180,6 @@ public class HotMethod {
 
 			if(line.contains("{")) {
 				if(scopeFound && stepInto == scopeDepth) {
-					System.out.println("first bracket found");
 					firstBracketFound = true;
 				}
 				stepInto += countMatches(line, "{");
