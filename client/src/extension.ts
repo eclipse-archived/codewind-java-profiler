@@ -21,13 +21,13 @@ import { promisify } from 'util';
 
 import * as tarfs from 'tar-fs';
 import * as Docker from 'dockerode';
-import * as ip from 'ip';
 
 const docker = new Docker();
 
 const followProgress = promisify(docker.modem.followProgress);
 
 const clientPort: number = 3333;
+const clientHost: string = "127.0.0.1"
 const dockerRepo: string = 'ibmcom';
 const dockerImage: string = 'codewind-java-profiler-language-server';
 const dockerTag: string = 'latest';
@@ -36,6 +36,10 @@ let clientServer: net.Server;
 let client: LanguageClient;
 let serverConnected = false;
 let connectionSocket;
+let onWin = false;
+if (process.platform === 'win32') {
+	onWin = true;
+}
 
 export async function activate(context: ExtensionContext) {
 
@@ -158,7 +162,7 @@ async function removeExistingContainer() {
 }
 
 async function startContainer(dockerBinds: string[]) {
-	console.log(`CLIENT_PORT=${clientPort}, CLIENT_HOST=${ip.address()}, BINDS="${dockerBinds}"`);
+	console.log(`CLIENT_PORT=${clientPort}, CLIENT_HOST=${clientHost}, BINDS="${dockerBinds}"`);
 	const container = await docker.createContainer({
 		Image: dockerFullImageName,
 		name: dockerImage,

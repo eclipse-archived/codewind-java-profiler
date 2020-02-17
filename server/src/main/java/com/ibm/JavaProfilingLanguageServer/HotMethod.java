@@ -21,8 +21,6 @@ import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.Range;
 import org.eclipse.lsp4j.TextDocumentItem;
 
-import org.apache.commons.lang.StringUtils;
-
 public class HotMethod {
 	private String methodName;
 	private String withinFileName; // includes class and any nested functions in format Class.function.function
@@ -152,8 +150,20 @@ public class HotMethod {
 		return finalString;
 	}
 
+	private int countMatches(String inputString, String stringToMatch) {
+		int count = 0;
+		int fromIndex = 0;
+		int foundIndex = inputString.indexOf(stringToMatch, fromIndex);
+		while (foundIndex != -1) {
+			count++;
+			fromIndex = foundIndex + 1;
+			foundIndex = inputString.indexOf(stringToMatch, fromIndex);
+		}
+		return count;
+	}
+
 	private Range getRangeInTextWithinScope(String scope, String text, Range range, int scopeDepth) {
-		System.out.printf("scope: %s, text: %s, range: %s, scopDepth: %s\n", scope, text, range, scopeDepth);
+		System.out.printf("scope: %s, text: %s, range: %s, scopeDepth: %s\n", scope, text, range, scopeDepth);
 		Range scopedRange = new Range();
 		System.out.println("Looking for scope: " + scope);
 		String[] lines = text.split("\\r?\\n");
@@ -162,14 +172,15 @@ public class HotMethod {
 		boolean scopeFound = false;
 		boolean firstBracketFound = false;
 		int stepInto = 0;
+		System.out.println("i starts as " + range.getStart().getLine());
+		System.out.println("i finishes as <= " + range.getEnd().getLine() + " or " + (lines.length - 1));
 
-
-		for (int i = range.getStart().getLine(); i < Math.min(range.getEnd().getLine(), lines.length); i++) {
+		for (int i = range.getStart().getLine(); i <= Math.min(range.getEnd().getLine(), lines.length - 1); i++) {
 			String line = lines[i];
 
 			if(!scopeFound && stepInto == scopeDepth) {
 				if(line.contains(scope)) {
-					System.out.println("found" + scope + " in " + line);
+					System.out.println("found " + scope + " in " + line);
 					Position start = new Position();
 					scopeFound = true;
 					start.setLine(i);
@@ -181,20 +192,20 @@ public class HotMethod {
 
 			if(line.contains("{")) {
 				System.out.println(line + " contains {");
-				if(scopeFound) {
+				if(scopeFound && stepInto == scopeDepth) {
 					System.out.println("first bracket found");
 					firstBracketFound = true;
 				}
-				stepInto += StringUtils.countMatches(line, "{");
+				stepInto += countMatches(line, "{");
 			}
 
 			if(line.contains("}")) {
-				stepInto -= StringUtils.countMatches(line, "}");;
+				stepInto -= countMatches(line, "}");;
 			}
 
 			if(firstBracketFound) {
 				scopedLines.add(line);
-				if(stepInto == 0) {
+				if(stepInto == scopeDepth) {
 					System.out.println("Setting end");
 					Position end = new Position();
 					end.setLine(i);
