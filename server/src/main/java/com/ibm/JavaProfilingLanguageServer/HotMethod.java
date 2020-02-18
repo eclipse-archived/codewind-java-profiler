@@ -87,11 +87,6 @@ public class HotMethod {
 
 			contextRange.setEnd(new Position(contextRange.getStart().getLine(), startOfMethodName + endOfMethodName));
 
-			// System.out.println("*** FINAL SCOPE ***");
-			// System.out.printf("Range: start: %s:%s, end: %s:%s%n",
-			// 	contextRange.getStart().getLine(), contextRange.getStart().getCharacter(),
-			// 	contextRange.getEnd().getLine(), contextRange.getEnd().getCharacter());
-
 		} catch (Exception e) {
 			System.out.println("Context not found within file");
 		}
@@ -156,7 +151,6 @@ public class HotMethod {
     }
 
 	private Range getRangeInTextWithinScope(String scope, String text, Range range, int scopeDepth) {
-		// System.out.printf("scope: %s, text: %s, range: %s, scopeDepth: %s\n", scope, text, range, scopeDepth);
 		Range scopedRange = new Range();
 		String[] lines = text.split("\\r?\\n");
 		List<String> scopedLines = new ArrayList<String>();

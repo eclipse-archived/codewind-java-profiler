@@ -30,7 +30,7 @@ const docker = new Docker();
 const followProgress = promisify(docker.modem.followProgress);
 
 const clientPort: number = 3333;
-const clientHost: string = "host.docker.internal"
+const clientHost: string = 'host.docker.internal';
 const dockerRepo: string = 'ibmcom';
 const dockerImage: string = 'codewind-java-profiler-language-server';
 const dockerTag: string = 'latest';
