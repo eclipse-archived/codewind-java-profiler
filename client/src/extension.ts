@@ -32,6 +32,7 @@ const followProgress = promisify(docker.modem.followProgress);
 const clientPort: number = 3333;
 const clientHost: string = 'host.docker.internal';
 const codewindVolumeName: string = 'codewind_cw-workspace';
+const dockerWorkspaceMountDir: string = '/profiling/workspaces';
 const dockerRepo: string = 'ibmcom';
 const dockerImage: string = 'codewind-java-profiler-language-server';
 const dockerTag: string = 'latest';
@@ -47,7 +48,7 @@ function workspaceFolderToDockerBind(wsFolder: WorkspaceFolder): string {
     if (onWin) {
         folderUriString = folderUriString.replace(':', '');
     }
-    return `${folderUriString}:/profiling/workspaces/${wsFolder.name}`;
+    return `${folderUriString}:${dockerWorkspaceMountDir}/${wsFolder.name}`;
 }
 
 export async function activate(context: ExtensionContext) {
@@ -171,7 +172,7 @@ async function startContainer(dockerBinds: string[]) {
 		name: dockerImage,
 		Env: [`CLIENT_PORT=${clientPort}`, `CLIENT_HOST=${clientHost}`, `BINDS="${dockerBinds}"`, `WINDOWS_HOST=${onWin}`],
 		HostConfig: {
-			Binds: [ `${codewindVolumeName}:/profiling/workspaces` ]
+			Binds: [ `${codewindVolumeName}:${dockerWorkspaceMountDir}` ]
 		}
 	});
 
