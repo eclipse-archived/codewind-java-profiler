@@ -91,17 +91,16 @@ async function startServerDockerContainer(dockerBinds: string[]) {
 		// don't care if already removed
 	}
 
-	// try {
-	// 	console.log(`Trying to pull image ${dockerFullImageName}`);
+	try {
+		console.log(`Trying to pull image ${dockerFullImageName}`);
 
-	// 	await pullDockerImage();
-	// 	console.log('Pull completed!');
-	// } catch (error) {
-	// 	console.log('Pull failed, building from local Dockerfile');
-	// 	await buildLocalDockerImage();
-	// 	console.log(error);
-	// }
-	await buildLocalDockerImage();
+		await pullDockerImage();
+		console.log('Pull completed!');
+	} catch (error) {
+		console.log('Pull failed, building from local Dockerfile');
+		await buildLocalDockerImage();
+		console.log(error);
+	}
 	await startContainer(dockerBinds);
 
 	setupConnectionListeners();
