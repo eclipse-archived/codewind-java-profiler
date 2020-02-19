@@ -9,12 +9,14 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package com.ibm.JavaProfilingLanguageServer;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ConnectException;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.Arrays;
 
 import org.eclipse.lsp4j.jsonrpc.Launcher;
 import org.eclipse.lsp4j.launch.LSPLauncher;
@@ -36,7 +38,7 @@ public class StartServer {
 		try {
 			ProfilingUtils.mountedVolumes = BINDS.split(",");
 			System.out.println("BINDS:");
-			System.out.println(ProfilingUtils.mountedVolumes);
+			System.out.println(Arrays.toString(ProfilingUtils.mountedVolumes));
 			System.out.println();
 			Socket socket = new Socket(HOST, PORT);
 			in = socket.getInputStream();

@@ -10,7 +10,6 @@
  *******************************************************************************/
 package com.ibm.JavaProfilingLanguageServer;
 
-import java.io.Console;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -79,7 +78,6 @@ public class HotMethod {
 			}
 
 			String[] lines = textDocument.getText().split("\\r?\\n");
-
 			int startOfMethodName = contextRange.getStart().getCharacter();
 
 			String findHotMethodString = methodName + "\\(.*\\)";
@@ -88,11 +86,6 @@ public class HotMethod {
 			int endOfMethodName = m.find() ? m.group(0).length() : methodName.length();
 
 			contextRange.setEnd(new Position(contextRange.getStart().getLine(), startOfMethodName + endOfMethodName));
-
-			//		System.out.println("*** FINAL SCOPE ***");
-			//		System.out.printf("Range: start: %s:%s, end: %s:%s%n",
-			//				contextRange.getStart().getLine(), contextRange.getStart().getCharacter(),
-			//				contextRange.getEnd().getLine(), contextRange.getEnd().getCharacter());
 
 		} catch (Exception e) {
 			System.out.println("Context not found within file");
@@ -145,10 +138,20 @@ public class HotMethod {
 		return finalString;
 	}
 
+    private int countMatches(String inputString, String stringToMatch) {
+        int count = 0;
+        int fromIndex = 0;
+        int foundIndex = inputString.indexOf(stringToMatch, fromIndex);
+        while (foundIndex != -1) {
+            count++;
+            fromIndex = foundIndex + 1;
+            foundIndex = inputString.indexOf(stringToMatch, fromIndex);
+        }
+        return count;
+    }
+
 	private Range getRangeInTextWithinScope(String scope, String text, Range range, int scopeDepth) {
-		// System.out.printf("scope: %s, text: %s, range: %s, scopDepth: %s", scope, text, range, scopeDepth);
 		Range scopedRange = new Range();
-		// System.out.println("Looking for scope: " + scope);
 		String[] lines = text.split("\\r?\\n");
 		List<String> scopedLines = new ArrayList<String>();
 
@@ -156,8 +159,7 @@ public class HotMethod {
 		boolean firstBracketFound = false;
 		int stepInto = 0;
 
-
-		for (int i = range.getStart().getLine(); i < Math.min(range.getEnd().getLine(), lines.length); i++) {
+		for (int i = range.getStart().getLine(); i <= Math.min(range.getEnd().getLine(), lines.length - 1); i++) {
 			String line = lines[i];
 
 			if(!scopeFound && stepInto == scopeDepth) {
@@ -171,19 +173,19 @@ public class HotMethod {
 			}
 
 			if(line.contains("{")) {
-				if(scopeFound) {
+				if(scopeFound && stepInto == scopeDepth) {
 					firstBracketFound = true;
 				}
-				stepInto ++;
+				stepInto += countMatches(line, "{");
 			}
 
 			if(line.contains("}")) {
-				stepInto --;
+				stepInto -= countMatches(line, "}");;
 			}
 
 			if(firstBracketFound) {
 				scopedLines.add(line);
-				if(stepInto == 0) {
+				if(stepInto == scopeDepth) {
 					Position end = new Position();
 					end.setLine(i);
 					end.setCharacter(line.length());

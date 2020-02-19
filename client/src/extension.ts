@@ -10,7 +10,11 @@
  *******************************************************************************/
 import * as path from 'path';
 import * as net from 'net';
-import { workspace, ExtensionContext } from 'vscode';
+import { 
+    workspace,
+    ExtensionContext,
+    WorkspaceFolder
+} from 'vscode';
 import {
 	LanguageClient,
 	LanguageClientOptions,
@@ -20,21 +24,30 @@ import { promisify } from 'util';
 
 import * as tarfs from 'tar-fs';
 import * as Docker from 'dockerode';
-import * as ip from 'ip';
 
 const docker = new Docker();
 
 const followProgress = promisify(docker.modem.followProgress);
 
 const clientPort: number = 3333;
+const clientHost: string = 'host.docker.internal';
 const dockerRepo: string = 'ibmcom';
 const dockerImage: string = 'codewind-java-profiler-language-server';
 const dockerTag: string = 'latest';
 const dockerFullImageName = `${dockerRepo}/${dockerImage}:${dockerTag}`;
+const onWin: boolean = (process.platform === 'win32' ? true : false);
 let clientServer: net.Server;
 let client: LanguageClient;
 let serverConnected = false;
 let connectionSocket;
+
+function workspaceFolderToDockerBind(wsFolder: WorkspaceFolder): string {
+    let folderUriString = wsFolder.uri.toString(true).replace('file://', '');
+    if (onWin) {
+        folderUriString = folderUriString.replace(':', '');
+    }
+    return `${folderUriString}:/profiling/${wsFolder.name}`;
+}
 
 export async function activate(context: ExtensionContext) {
 
@@ -44,7 +57,7 @@ export async function activate(context: ExtensionContext) {
 	clientServer.listen(clientPort);
 
 	// start docker container
-	const dockerBinds = workspace.workspaceFolders.map(wsFolder => `${wsFolder.uri.toString(true).replace('file://', '')}:/profiling/${wsFolder.name}`);
+	const dockerBinds = workspace.workspaceFolders.map(workspaceFolderToDockerBind);
 	dockerBinds.forEach(a => console.log(a));
 
 	let serverOptions = () => startServerDockerContainer(dockerBinds);
@@ -55,7 +68,7 @@ export async function activate(context: ExtensionContext) {
 		documentSelector: [{ scheme: 'file', language: 'java' }],
 		synchronize: {
 			// Notify the server about file changes to '.hdc files contained in the workspace
-			fileEvents: workspace.createFileSystemWatcher('**/*.hdc')
+			fileEvents: workspace.createFileSystemWatcher('**/*.hcd')
 		}
 	};
 
@@ -155,7 +168,7 @@ async function startContainer(dockerBinds: string[]) {
 	const container = await docker.createContainer({
 		Image: dockerFullImageName,
 		name: dockerImage,
-		Env: [`CLIENT_PORT=${clientPort}`, `CLIENT_HOST=${ip.address()}`, `BINDS="${dockerBinds}"`],
+		Env: [`CLIENT_PORT=${clientPort}`, `CLIENT_HOST=${clientHost}`, `BINDS="${dockerBinds}"`, `WINDOWS_HOST=${onWin}`],
 		HostConfig: {
 			Binds: dockerBinds
 		}
