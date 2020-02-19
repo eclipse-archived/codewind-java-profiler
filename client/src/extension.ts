@@ -114,8 +114,10 @@ async function startServerDockerContainer(dockerBinds: string[]) {
 		await buildLocalDockerImage();
 		console.log(error);
     }
+    await startContainer(dockerBinds);
+
     setupConnectionListeners();
-	const serverSocket = await waitForServerConnection();
+    const serverSocket = await waitForServerConnection();
 
 	// Connect to language server via socket
 	let result: StreamInfo = {
