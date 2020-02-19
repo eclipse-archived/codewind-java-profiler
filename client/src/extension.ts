@@ -9,6 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 import * as path from 'path';
+import * as fs from 'fs';
 import * as net from 'net';
 import { 
     workspace,
@@ -24,6 +25,7 @@ import { promisify } from 'util';
 
 import * as tarfs from 'tar-fs';
 import * as Docker from 'dockerode';
+import { URL } from 'url';
 
 const docker = new Docker();
 
@@ -43,12 +45,21 @@ let client: LanguageClient;
 let serverConnected = false;
 let connectionSocket;
 
-function workspaceFolderToDockerBind(wsFolder: WorkspaceFolder): string {
+async function workspaceFolderToDockerBind(wsFolder: WorkspaceFolder): Promise<string> {
     let folderUriString = wsFolder.uri.toString(true).replace('file://', '');
     if (onWin) {
         folderUriString = folderUriString.replace(':', '');
     }
-    return `${folderUriString}:${dockerWorkspaceMountDir}/${wsFolder.name}`;
+    // check if we're attempting to bind a project folder or a parent directory
+    const wsFolderURL = new URL(wsFolder.uri.toString(true));
+    const wsFolderContents = fs.readdirSync(wsFolderURL);
+    console.log("wsFolderContents = " + wsFolderContents);
+    if (wsFolderContents.includes('.cw-settings')) {
+        // project folder
+        return `${folderUriString}:${dockerWorkspaceMountDir}/${wsFolder.name}`;
+    }
+    // parent directory
+    return `${folderUriString}:${dockerWorkspaceMountDir}`;
 }
 
 export async function activate(context: ExtensionContext) {
@@ -59,7 +70,7 @@ export async function activate(context: ExtensionContext) {
 	clientServer.listen(clientPort);
 
 	// start docker container
-	const dockerBinds = workspace.workspaceFolders.map(workspaceFolderToDockerBind);
+	const dockerBinds = await Promise.all(workspace.workspaceFolders.map(workspaceFolderToDockerBind));
 	dockerBinds.forEach(a => console.log(a));
 
 	let serverOptions = () => startServerDockerContainer(dockerBinds);
@@ -102,10 +113,8 @@ async function startServerDockerContainer(dockerBinds: string[]) {
 		console.log('Pull failed, building from local Dockerfile');
 		await buildLocalDockerImage();
 		console.log(error);
-	}
-	await startContainer(dockerBinds);
-
-	setupConnectionListeners();
+    }
+    setupConnectionListeners();
 	const serverSocket = await waitForServerConnection();
 
 	// Connect to language server via socket
