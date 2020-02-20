@@ -52,7 +52,7 @@ public class ProfilingTextDocumentService implements TextDocumentService {
 
 		for (WorkspaceFolder folder : workspaceFolders) {
 			File currentFile = new File(folder.getUri());
-			System.out.println("Workspace Folder: " + folder.getUri() + "\n");
+			System.out.println("Workspace Folder: " + currentFile.getPath() + "\n");
 			mcProjectFolders.addAll(searchForFolders(currentFile, ProfilingUtils.LOAD_TEST_DIRECTORY));
 		}
 
@@ -86,7 +86,7 @@ public class ProfilingTextDocumentService implements TextDocumentService {
 
 	public void didOpen(DidOpenTextDocumentParams params) {
 		TextDocumentItem document = params.getTextDocument();
-		System.out.printf("didOpen: %s%n%n", document.getUri());
+		System.out.printf("didOpen: %s%n%n", ProfilingUtils.convertColon(document.getUri()));
 
 		publishProfilingDiagnostics(document);
 	}
@@ -98,7 +98,7 @@ public class ProfilingTextDocumentService implements TextDocumentService {
 		diagnosticParams.setUri(textDocument.getUri());
 
 		// convert URI to docker version
-		textDocument.setUri(ProfilingUtils.dockerizeFilePath(textDocument.getUri()));
+		textDocument.setUri(ProfilingUtils.dockerizeFilePath(ProfilingUtils.convertColon(textDocument.getUri())));
 
 		String projectPath = getProjectForPath(textDocument.getUri());
 		System.out.println("Project Path for file: " + projectPath + "\n");
@@ -154,7 +154,6 @@ public class ProfilingTextDocumentService implements TextDocumentService {
 		List<Diagnostic> diagnostics = new ArrayList<Diagnostic>();
 
 		String documentPackage = getDocumentPackage(textDocument);
-//		System.out.println("documentPackage: " + documentPackage);
 
 		File hcd = getHCDFromLoadTestDir(loadTestResults);
 
