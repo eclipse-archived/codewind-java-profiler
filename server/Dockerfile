@@ -21,4 +21,4 @@ RUN echo `ls`;
 RUN mvn install:install-file -Dfile=/opt/ibm/java/jre/lib/tools/monitoring-api.jar -DgroupId=com.ibm.java.diagnostics.healthcenter -DartifactId=com.ibm.java.diagnostics.healthcenter -Dversion=1.0 -Dpackaging=jar
 RUN mvn clean install
 WORKDIR /profiling/target
-CMD java -jar MicrocliomateJavaProfilingLanguageServer-0.0.1-SNAPSHOT-jar-with-dependencies.jar
+CMD java -jar CodewindJavaProfilingLanguageServer-0.9.0-jar-with-dependencies.jar
